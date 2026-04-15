@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">test1</string>
+    <string name="teksHeadline">Masukan Nama</string>
+    <string name="hint">Ketik Nama Disini</string>
+    <string name="btnKirim">Kirim</string>
+    <string name="btnFoto">Kirim Foto!</string>
+
+</resources>
