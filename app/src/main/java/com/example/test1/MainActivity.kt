@@ -38,6 +38,10 @@ class MainActivity : AppCompatActivity() {
     private fun ambilLokasiGps(mapView: MapView){
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
+        //sqlite
+        val sharedPref = getSharedPreferences("DataUser", Context.MODE_PRIVATE)
+        val dbHelper = DatabaseHelper (this)
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 100)
             return
@@ -60,6 +64,17 @@ class MainActivity : AppCompatActivity() {
             mapView.controller.animateTo(userLocation)
             mapView.controller.setZoom(18.0)
             mapView.invalidate()
+
+            //simpan data ke database
+            val namaUser = sharedPref.getString ("KEY_NAME", "Anonim") ?: "Anonim"
+            val lat = it.latitude.toString()
+            val lon = it.longitude.toString()
+
+            val hasilSimpan = dbHelper.simpanRiwayat(namaUser, lat, lon)
+
+            if (hasilSimpan != -1L) {
+                android.widget.Toast.makeText(this, "Data tersimpan ke database!", android.widget.Toast.LENGTH_SHORT).show()
+            }
 
             android.widget.Toast.makeText(this, "Lokasi Terdeteksi!", android.widget.Toast.LENGTH_SHORT).show()
         } ?: run {
@@ -96,6 +111,8 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        val dbHelper = DatabaseHelper (this)
+
         //variabel buat masukin variabel inputNama dan btnNext
         val btnNext = findViewById<Button>(R.id.btnNext)
         val inputNama = findViewById<EditText>(R.id.inputNama)
@@ -127,5 +144,26 @@ class MainActivity : AppCompatActivity() {
         val startPoint = GeoPoint(-8.6705, 115.2126)
         mapController.setCenter(startPoint)
 
+        //inisiasi sharedpreferences, nama file "DataUser"
+        val sharedPref = getSharedPreferences("DataUser", Context.MODE_PRIVATE)
+
+        //cek(validasi)
+        val namaTersimpan = sharedPref.getString("KEY_NAMA", "")
+        if (!namaTersimpan.isNullOrEmpty()){
+            inputNama.setText(namaTersimpan)
+        }
+
+        //modifikasi tombol btnNext
+        btnNext.setOnClickListener {
+            val nama = inputNama.text.toString()
+
+            val editor = sharedPref.edit()
+            editor.putString("KEY_NAMA", nama)
+            editor.apply()
+
+            val intent = Intent (this, DetailActivity::class.java)
+            intent.putExtra("EXTRA_NAMA", nama)
+            startActivity(intent)
+        }
     }
 }
