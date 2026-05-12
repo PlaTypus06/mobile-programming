@@ -5,4 +5,5 @@
     <string name="btnKirim">Kirim</string>
     <string name="btnFoto">Kirim Foto!</string>
     <string name="btnHapus">Hapus Riwayat</string>
+    <string name="btnTampilkan">Lihat Data</string>
 </resources>

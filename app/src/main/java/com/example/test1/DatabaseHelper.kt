@@ -2,6 +2,7 @@ package com.example.test1
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import java.util.NavigableMap
@@ -9,17 +10,16 @@ import java.util.NavigableMap
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "AbsensiDB", null, 1){
     override fun onCreate(db : SQLiteDatabase?){
         //tabel history
-        val queryBuatTabel = "CREATE TABLE tb_riwayat (id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT, lat TEXT, lot TEXT)"
+        val queryBuatTabel = "CREATE TABLE tb_riwayat (id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT, lat TEXT, lon TEXT)"
         db?.execSQL(queryBuatTabel)
     }
 
-    override fun onUpgrade(
-        p0: SQLiteDatabase?,
-        p1: Int,
-        p2: Int
-    ) {
-        TODO("Not yet implemented")
+    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+        db?.execSQL("DROP TABLE IF EXISTS tb_riwayat")
+        onCreate(db)
     }
+
+
 
     //masukan ke db
     fun simpanRiwayat (nama: String, lat: String, lon: String): Long{
@@ -29,5 +29,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "AbsensiDB", 
         values.put ("lat", lat)
         values.put ("lon", lon)
         return db.insert("tb_riwayat", null, values)
+    }
+    fun bacaSemuaData(): Cursor{
+        return readableDatabase.rawQuery("SELECT * FROM tb_riwayat", null)
+    }
+
+    fun hapusSemuaData() {
+        writableDatabase.execSQL("DELETE FROM tb_riwayat")
     }
 }

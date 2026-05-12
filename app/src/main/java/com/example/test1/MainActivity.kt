@@ -29,10 +29,9 @@ import android.content.Context
 import androidx.core.app.ActivityCompat
 import android.content.pm.PackageManager
 import android.Manifest
+import android.widget.Toast
 
 class MainActivity : AppCompatActivity() {
-
-
 
     //function dapat lokasi GPS real-time
     private fun ambilLokasiGps(mapView: MapView){
@@ -41,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         //sqlite
         val sharedPref = getSharedPreferences("DataUser", Context.MODE_PRIVATE)
         val dbHelper = DatabaseHelper (this)
+
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 100)
@@ -66,26 +66,26 @@ class MainActivity : AppCompatActivity() {
             mapView.invalidate()
 
             //simpan data ke database
-            val namaUser = sharedPref.getString ("KEY_NAME", "Anonim") ?: "Anonim"
+            val namaUser = sharedPref.getString ("KEY_NAMA", "Anonim") ?: "Anonim"
             val lat = it.latitude.toString()
             val lon = it.longitude.toString()
 
             val hasilSimpan = dbHelper.simpanRiwayat(namaUser, lat, lon)
 
             if (hasilSimpan != -1L) {
-                android.widget.Toast.makeText(this, "Data tersimpan ke database!", android.widget.Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Data tersimpan ke database!", Toast.LENGTH_SHORT).show()
             }
 
-            android.widget.Toast.makeText(this, "Lokasi Terdeteksi!", android.widget.Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Lokasi Terdeteksi!", Toast.LENGTH_SHORT).show()
         } ?: run {
-            android.widget.Toast.makeText(this, "GPS Belum Siap", android.widget.Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "GPS Belum Siap", Toast.LENGTH_LONG).show()
         }
     }
 
 
     //variabel untuk mengambil foto
     private val ambilFoto = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
-        result ->
+            result ->
         if (result.resultCode == RESULT_OK){
             val imageBitmap = result.data?.extras?.get("data") as Bitmap
             val ivFoto = findViewById<ImageView>(R.id.ivFoto)
@@ -102,7 +102,6 @@ class MainActivity : AppCompatActivity() {
         //inslatalasi konfigurasi OSM
         Configuration.getInstance().load(this, getSharedPreferences("osmdroid", MODE_PRIVATE))
 
-
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -111,21 +110,13 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        val dbHelper = DatabaseHelper (this)
+        val dbHelper = DatabaseHelper(this)
 
         //variabel buat masukin variabel inputNama dan btnNext
         val btnNext = findViewById<Button>(R.id.btnNext)
         val inputNama = findViewById<EditText>(R.id.inputNama)
 
-        btnNext.setOnClickListener {
-            val nama = inputNama.text.toString()
-
-            val intent = Intent (this, DetailActivity::class.java)
-            intent.putExtra("EXTRA_NAMA", nama)
-            startActivity(intent)
-        }
-
-        //variabel tombol kamera (pertemuan 4)
+        //variabel tombol kamera
         val btnFoto = findViewById<Button>(R.id.btnFoto)
         btnFoto.setOnClickListener {
             val klik = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
@@ -147,13 +138,13 @@ class MainActivity : AppCompatActivity() {
         //inisiasi sharedpreferences, nama file "DataUser"
         val sharedPref = getSharedPreferences("DataUser", Context.MODE_PRIVATE)
 
-        //cek(validasi)
+        //cek(validasi) nama tersimpan
         val namaTersimpan = sharedPref.getString("KEY_NAMA", "")
         if (!namaTersimpan.isNullOrEmpty()){
             inputNama.setText(namaTersimpan)
         }
 
-        //modifikasi tombol btnNext
+        //Logika tombol btnNext (Simpan nama ke SharedPref & Pindah ke Detail)
         btnNext.setOnClickListener {
             val nama = inputNama.text.toString()
 
@@ -164,6 +155,13 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent (this, DetailActivity::class.java)
             intent.putExtra("EXTRA_NAMA", nama)
             startActivity(intent)
+        }
+
+        // --- TAMBAHAN: Tombol Tampilkan Data untuk ke HistoryActivity ---
+        val btnTampilkanData = findViewById<Button>(R.id.btnTampilkan)
+        btnTampilkanData.setOnClickListener {
+            val intentHistory = Intent(this, HistoryActivity::class.java)
+            startActivity(intentHistory)
         }
     }
 }

@@ -9,7 +9,7 @@
     tools:context=".HistoryActivity">
 
     <ListView
-        android:id="@+id/lvHistory"
+        android:id="@+id/lvRiwayat"
         android:layout_width="409dp"
         android:layout_height="912dp"
         android:layout_weight="1">
